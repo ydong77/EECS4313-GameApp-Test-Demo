@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OthelloController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EECS3311 Othello</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.eecs3311.othello.model</a> &gt; <span class="el_source">OthelloController.java</span></div><h1>OthelloController.java</h1><pre class="source lang-java linenums">package ca.yorku.eecs3311.othello.model;
+
+/**
+ * MVC Controller: drives the Othello model using two Player strategies.
+ */
+public abstract class OthelloController {
+
+	protected Othello othello;
+	Player player1, player2;
+
+	/**
+	 * Constructs a new OthelloController with a new Othello game, ready to play
+	 * with a user at the console.
+	 */
+<span class="nc" id="L15">	public OthelloController() {</span>
+<span class="nc" id="L16">		this.othello = new Othello();</span>
+<span class="nc" id="L17">	}</span>
+
+	public void play() {
+<span class="nc bnc" id="L20" title="All 2 branches missed.">		while (!othello.isGameOver()) {</span>
+<span class="nc" id="L21">			this.report();</span>
+			
+<span class="nc" id="L23">			Move move=null;</span>
+<span class="nc" id="L24">			char whosTurn = othello.getWhosTurn();</span>
+			
+<span class="nc bnc" id="L26" title="All 2 branches missed.">			if(whosTurn==OthelloBoard.P1)move = player1.getMove();</span>
+<span class="nc bnc" id="L27" title="All 2 branches missed.">			if(whosTurn==OthelloBoard.P2)move = player2.getMove();</span>
+
+<span class="nc" id="L29">			this.reportMove(whosTurn, move);</span>
+<span class="nc" id="L30">			othello.move(move.getRow(), move.getCol());</span>
+<span class="nc" id="L31">		}</span>
+<span class="nc" id="L32">		this.reportFinal();</span>
+<span class="nc" id="L33">	}</span>
+<span class="nc" id="L34">	protected void reportMove(char whosTurn, Move move) { }</span>
+<span class="nc" id="L35">	protected void report() { }</span>
+<span class="nc" id="L36">	protected void reportFinal() { }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,27 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+EECS3311 Othello,ca.yorku.eecs3311.mvcexample,MCounter,27,0,0,0,9,0,4,0,4,0
+EECS3311 Othello,ca.yorku.eecs3311.mvcexample,VParity,19,0,2,0,6,0,3,0,2,0
+EECS3311 Othello,ca.yorku.eecs3311.mvcexample,VCount,12,0,0,0,4,0,2,0,2,0
+EECS3311 Othello,ca.yorku.eecs3311.mvcexample,MVCApplication,91,0,0,0,21,0,3,0,3,0
+EECS3311 Othello,ca.yorku.eecs3311.mvcexample,CButtonPressEventHandler,26,0,4,0,9,0,4,0,2,0
+EECS3311 Othello,ca.yorku.eecs3311.othello.viewcontroller,OthelloApplication,427,758,33,35,87,134,30,28,10,14
+EECS3311 Othello,ca.yorku.eecs3311.othello.model,OthelloControllerHumanVSGreedy,26,0,0,0,7,0,2,0,2,0
+EECS3311 Othello,ca.yorku.eecs3311.othello.model,OthelloControllerHumanVSHuman,26,0,0,0,7,0,2,0,2,0
+EECS3311 Othello,ca.yorku.eecs3311.othello.model,OthelloControllerHumanVSRandom,26,0,0,0,7,0,2,0,2,0
+EECS3311 Othello,ca.yorku.eecs3311.othello.model,PlayerHuman,65,0,4,0,20,0,6,0,4,0
+EECS3311 Othello,ca.yorku.eecs3311.othello.model,Othello,58,136,5,11,14,31,7,14,4,9
+EECS3311 Othello,ca.yorku.eecs3311.othello.model,RandomVSRandom.FlipProbabilities,15,0,0,0,4,0,2,0,2,0
+EECS3311 Othello,ca.yorku.eecs3311.othello.model,OthelloMoveCommand,8,11,0,0,2,4,2,1,2,1
+EECS3311 Othello,ca.yorku.eecs3311.othello.model,OthelloController,53,0,6,0,17,0,8,0,5,0
+EECS3311 Othello,ca.yorku.eecs3311.othello.model,PlayerGreedy,62,0,8,0,12,0,6,0,2,0
+EECS3311 Othello,ca.yorku.eecs3311.othello.model,Move,0,21,0,0,0,6,0,4,0,4
+EECS3311 Othello,ca.yorku.eecs3311.othello.model,OthelloControllerRandomVSGreedy,67,0,6,0,13,0,5,0,2,0
+EECS3311 Othello,ca.yorku.eecs3311.othello.model,RenderVisitor,4,167,1,15,1,35,2,11,1,4
+EECS3311 Othello,ca.yorku.eecs3311.othello.model,OthelloBoard,419,525,46,88,67,94,26,57,1,15
+EECS3311 Othello,ca.yorku.eecs3311.othello.model,RandomVSRandom,121,0,10,0,29,0,8,0,3,0
+EECS3311 Othello,ca.yorku.eecs3311.othello.model,Player,12,0,0,0,5,0,2,0,2,0
+EECS3311 Othello,ca.yorku.eecs3311.othello.model,OthelloControllerRandomVSRandom,67,0,6,0,13,0,5,0,2,0
+EECS3311 Othello,ca.yorku.eecs3311.othello.model,PlayerRandom,54,0,6,0,9,0,5,0,2,0
+EECS3311 Othello,ca.yorku.eecs3311.othello.model,OthelloControllerVerbose,50,0,0,0,15,0,4,0,4,0
+EECS3311 Othello,ca.yorku.eecs3311.othello.model,CountVisitor,0,23,0,2,0,7,0,4,0,3
+EECS3311 Othello,ca.yorku.eecs3311.util,Observable,36,0,2,0,10,0,5,0,4,0

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Othello.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EECS3311 Othello</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.eecs3311.othello.model</a> &gt; <span class="el_source">Othello.java</span></div><h1>Othello.java</h1><pre class="source lang-java linenums">package ca.yorku.eecs3311.othello.model;
+import ca.yorku.eecs3311.util.*;
+import java.util.Random;
+
+/**
+ * Capture an Othello game. This includes an OthelloBoard as well as knowledge
+ * of how many moves have been made, whosTurn is next (OthelloBoard.P1 or
+ * OthelloBoard.P2). It knows how to make a move using the board and can tell
+ * you statistics about the game, such as how many tokens P1 has and how many
+ * tokens P2 has. It knows who the winner of the game is, and when the game is
+ * over.
+ * 
+ * See the following for a short, simple introduction.
+ * https://www.youtube.com/watch?v=Ol3Id7xYsY4
+ * 
+ * Design Patterns: MVC Model for game logic; delegates Visitor to its board; 
+ * Command/Memento compatibility via copy().
+ * 
+ * @author student
+ *
+ */
+public class Othello {
+	public static final int DIMENSION=8; // This is an 8x8 game
+
+<span class="fc" id="L25">	private OthelloBoard board=new OthelloBoard(Othello.DIMENSION);</span>
+<span class="fc" id="L26">	private char whosTurn = OthelloBoard.P1;</span>
+<span class="fc" id="L27">	private int numMoves = 0;</span>
+	
+	/**
+	 * Default constructor for a new game.
+	 */
+<span class="fc" id="L32">	public Othello() {</span>
+<span class="fc" id="L33">	}</span>
+	
+	/**
+	 * Construct an Othello game from existing state (used for load/undo/redo).
+	 */
+<span class="fc" id="L38">	public Othello(OthelloBoard board, char whosTurn, int numMoves) {</span>
+<span class="fc" id="L39">		this.board = board.copy();</span>
+<span class="fc" id="L40">		this.whosTurn = whosTurn;</span>
+<span class="fc" id="L41">		this.numMoves = numMoves;</span>
+<span class="fc" id="L42">	}</span>
+
+	/**
+	 * return P1,P2 or EMPTY depending on who moves next.
+	 * 
+	 * @return P1, P2 or EMPTY
+	 */
+	public char getWhosTurn() {
+<span class="fc" id="L50">		return this.whosTurn;</span>
+	}
+	
+	/**
+	 * 
+	 * @param row 
+	 * @param col
+	 * @return the token at position row, col.
+	 */
+	public char getToken(int row, int col) {
+<span class="nc" id="L60">		return this.board.get(row, col);</span>
+	}
+
+	/**
+	 * Attempt to make a move for P1 or P2 (depending on whos turn it is) at
+	 * position row, col. A side effect of this method is modification of whos turn
+	 * and the move count.
+	 * 
+	 * @param row
+	 * @param col
+	 * @return whether the move was successfully made.
+	 */
+	public boolean move(int row, int col) {
+<span class="fc bfc" id="L73" title="All 2 branches covered.">		if(this.board.move(row, col, this.whosTurn)) {</span>
+<span class="fc" id="L74">			this.whosTurn = OthelloBoard.otherPlayer(this.whosTurn);</span>
+<span class="fc" id="L75">			char allowedMove = board.hasMove();</span>
+<span class="fc bfc" id="L76" title="All 2 branches covered.">			if(allowedMove!=OthelloBoard.BOTH)this.whosTurn=allowedMove;</span>
+<span class="fc" id="L77">			this.numMoves++;</span>
+<span class="fc" id="L78">			return true;</span>
+		} else {
+<span class="fc" id="L80">			return false;</span>
+		}
+	}
+
+
+	/**
+	 * 
+	 * @param player P1 or P2
+	 * @return the number of tokens for player on the board
+	 */
+	public int getCount(char player) {
+<span class="fc" id="L91">		return board.getCount(player);</span>
+	}
+
+	/**
+	 * 
+	 * @return number of moves made so far.
+	 */
+	public int getNumMoves() {
+<span class="nc" id="L99">		return this.numMoves;</span>
+	}
+
+
+	/**
+	 * Returns the winner of the game.
+	 * 
+	 * @return P1, P2 or EMPTY for no winner, or the game is not finished.
+	 */
+	public char getWinner() {
+<span class="fc bfc" id="L109" title="All 2 branches covered.">		if(!this.isGameOver())return OthelloBoard.EMPTY;</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">		if(this.getCount(OthelloBoard.P1)&gt; this.getCount(OthelloBoard.P2))return OthelloBoard.P1;</span>
+<span class="pc bpc" id="L111" title="1 of 2 branches missed.">		if(this.getCount(OthelloBoard.P1)&lt; this.getCount(OthelloBoard.P2))return OthelloBoard.P2;</span>
+<span class="fc" id="L112">		return OthelloBoard.EMPTY;</span>
+	}
+
+
+	/**
+	 * 
+	 * @return whether the game is over (no player can move next)
+	 */
+	public boolean isGameOver() {
+<span class="fc bfc" id="L121" title="All 2 branches covered.">		return this.whosTurn==OthelloBoard.EMPTY;</span>
+	}
+
+	/**
+	 * 
+	 * @return a copy of this. The copy can be manipulated without impacting this.
+	 */
+	public Othello copy() {
+<span class="fc" id="L129">		Othello o= new Othello();</span>
+<span class="fc" id="L130">		o.board=this.board.copy();</span>
+<span class="fc" id="L131">		o.numMoves = this.numMoves;</span>
+<span class="fc" id="L132">		o.whosTurn = this.whosTurn;</span>
+<span class="fc" id="L133">		return o;</span>
+	}
+	
+	/**
+	 * Accept a board visitor (Visitor pattern delegation).
+	 */
+	public void accept(BoardVisitor visitor) {
+<span class="fc" id="L140">		this.board.accept(visitor);</span>
+<span class="fc" id="L141">	}</span>
+
+
+	/**
+	 * 
+	 * @return a string representation of the board.
+	 */
+	public String getBoardString() {
+<span class="nc" id="L149">		return board.toString()+&quot;\n&quot;;</span>
+	}
+
+
+	/**
+	 * run this to test the current class. We play a completely random game. DO NOT
+	 * MODIFY THIS!! See the assignment page for sample outputs from this.
+	 * 
+	 * @param args
+	 */
+	public static void main(String [] args) {
+<span class="nc" id="L160">		Random rand = new Random();</span>
+
+
+<span class="nc" id="L163">		Othello o = new Othello();</span>
+<span class="nc" id="L164">		System.out.println(o.getBoardString());</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">		while(!o.isGameOver()) {</span>
+<span class="nc" id="L166">			int row = rand.nextInt(8);</span>
+<span class="nc" id="L167">			int col = rand.nextInt(8);</span>
+
+<span class="nc bnc" id="L169" title="All 2 branches missed.">			if(o.move(row, col)) {</span>
+<span class="nc" id="L170">				System.out.println(&quot;makes move (&quot;+row+&quot;,&quot;+col+&quot;)&quot;);</span>
+<span class="nc" id="L171">				System.out.println(o.getBoardString()+ o.getWhosTurn()+&quot; moves next&quot;);</span>
+			}
+<span class="nc" id="L173">		}</span>
+
+<span class="nc" id="L175">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

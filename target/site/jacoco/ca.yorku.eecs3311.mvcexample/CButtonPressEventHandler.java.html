@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CButtonPressEventHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EECS3311 Othello</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.eecs3311.mvcexample</a> &gt; <span class="el_source">CButtonPressEventHandler.java</span></div><h1>CButtonPressEventHandler.java</h1><pre class="source lang-java linenums">package ca.yorku.eecs3311.mvcexample;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.control.Button;
+
+public class CButtonPressEventHandler implements EventHandler&lt;ActionEvent&gt; {
+	private MCounter mcounter;
+<span class="nc" id="L8">	public CButtonPressEventHandler(MCounter mcounter) {</span>
+<span class="nc" id="L9">		this.mcounter=mcounter;</span>
+<span class="nc" id="L10">	}</span>
+	
+	@Override
+	public void handle(ActionEvent event) {
+<span class="nc" id="L14">		Button source=(Button)event.getSource();</span>
+<span class="nc bnc" id="L15" title="All 2 branches missed.">		if(source.getText()==&quot;increment&quot;) {</span>
+<span class="nc" id="L16">			mcounter.increment();</span>
+<span class="nc bnc" id="L17" title="All 2 branches missed.">		} else if(source.getText()==&quot;decrement&quot;) {</span>
+<span class="nc" id="L18">			mcounter.decrement();</span>
+		}
+<span class="nc" id="L20">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

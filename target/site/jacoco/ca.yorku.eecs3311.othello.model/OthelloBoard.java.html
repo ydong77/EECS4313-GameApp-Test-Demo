@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OthelloBoard.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EECS3311 Othello</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.eecs3311.othello.model</a> &gt; <span class="el_source">OthelloBoard.java</span></div><h1>OthelloBoard.java</h1><pre class="source lang-java linenums">package ca.yorku.eecs3311.othello.model;
+/**
+ * Keep track of all of the tokens on the board. This understands some
+ * interesting things about an Othello board, what the board looks like at the
+ * start of the game, what the players tokens look like ('X' and 'O'), whether
+ * given coordinates are on the board, whether either of the players have a move
+ * somewhere on the board, what happens when a player makes a move at a specific
+ * location (the opposite players tokens are flipped).
+ * 
+ * Othello makes use of the OthelloBoard.
+ * 
+ * Design Patterns: MVC Model holding board state; supports Visitor via accept().
+ * 
+ * @author student
+ *
+ */
+public class OthelloBoard {
+	public static final char EMPTY = ' ', P1 = 'X', P2 = 'O', BOTH = 'B';
+<span class="fc" id="L19">	private int dim = 8;</span>
+	private char[][] board;
+
+<span class="fc" id="L22">	public OthelloBoard(int dim) {</span>
+<span class="fc" id="L23">		this.dim = dim;</span>
+<span class="fc" id="L24">		board = new char[this.dim][this.dim];</span>
+<span class="fc bfc" id="L25" title="All 2 branches covered.">		for (int row = 0; row &lt; this.dim; row++) {</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">			for (int col = 0; col &lt; this.dim; col++) {</span>
+<span class="fc" id="L27">				this.board[row][col] = EMPTY;</span>
+			}
+		}
+<span class="fc" id="L30">		int mid = this.dim / 2;</span>
+<span class="fc" id="L31">		this.board[mid - 1][mid - 1] = this.board[mid][mid] = P1;</span>
+<span class="fc" id="L32">		this.board[mid][mid - 1] = this.board[mid - 1][mid] = P2;</span>
+<span class="fc" id="L33">	}</span>
+	
+	/**
+	 * Construct a board from existing grid values.
+	 */
+<span class="fc" id="L38">	public OthelloBoard(char[][] boardData) {</span>
+<span class="fc" id="L39">		this.dim = boardData.length;</span>
+<span class="fc" id="L40">		this.board = new char[this.dim][this.dim];</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">		for (int r = 0; r &lt; this.dim; r++) {</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">			for (int c = 0; c &lt; this.dim; c++) {</span>
+<span class="fc" id="L43">				this.board[r][c] = boardData[r][c];</span>
+			}
+		}
+<span class="fc" id="L46">	}</span>
+
+	/**
+	 * 
+	 * @return a copy of this
+	 */
+	public OthelloBoard copy() {
+<span class="fc" id="L53">		OthelloBoard ob = new OthelloBoard(this.dim);</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">		for (int row = 0; row &lt; this.dim; row++) {</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">			for (int col = 0; col &lt; this.dim; col++) {</span>
+<span class="fc" id="L56">				ob.board[row][col] = this.board[row][col];</span>
+			}
+		}
+<span class="fc" id="L59">		return ob;</span>
+	}
+
+	/**
+	 * 
+	 * @param row starting row, in {0,...,dim-1} (typically {0,...,7})
+	 * @param col starting col, in {0,...,dim-1} (typically {0,...,7})
+	 * @return P1,P2 or EMPTY, EMPTY is returned for an invalid (row,col)
+	 */
+	public char get(int row, int col) {
+<span class="fc bfc" id="L69" title="All 2 branches covered.">		if(this.validCoordinate(row, col))return this.board[row][col];</span>
+<span class="fc" id="L70">		else return EMPTY;</span>
+	}
+	
+	public int getDimension() {
+<span class="fc" id="L74">		return this.dim;</span>
+	}
+
+	/**
+	 * 
+	 * @param player either P1 or P2
+	 * @return P2 or P1, the opposite of player
+	 */
+	public static char otherPlayer(char player) {
+<span class="fc bfc" id="L83" title="All 2 branches covered.">		if (player == P1)</span>
+<span class="fc" id="L84">			return P2;</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">		if (player == P2)</span>
+<span class="fc" id="L86">			return P1;</span>
+<span class="fc" id="L87">		return EMPTY;</span>
+	}
+
+
+	/**
+	 * 
+	 * @param row starting row, in {0,...,dim-1} (typically {0,...,7})
+	 * @param col starting col, in {0,...,dim-1} (typically {0,...,7})
+	 * @return whether (row,col) is a position on the board. Example: (6,12) is not
+	 *         a position on the board with dim 8x8.
+	 */
+	private boolean validCoordinate(int row, int col) {
+<span class="fc bfc" id="L99" title="All 8 branches covered.">		return 0 &lt;= row &amp;&amp; row &lt; this.dim &amp;&amp; 0 &lt;= col &amp;&amp; col &lt; this.dim;</span>
+	}
+	/**
+	 * flip all other player tokens to player, starting at (row,col) in direction
+	 * (drow, dcol). Example: If (drow,dcol)=(0,1) and player==O then XXXO will
+	 * result in a flip to OOOO
+	 * 
+	 * @param row    starting row, in {0,...,dim-1} (typically {0,...,7})
+	 * @param col    starting col, in {0,...,dim-1} (typically {0,...,7})
+	 * @param drow   the row direction, in {-1,0,1}
+	 * @param dcol   the col direction, in {-1,0,1}
+	 * @param player Either OthelloBoard.P1 or OthelloBoard.P2, the target token to
+	 *               flip to.
+	 * @return the number of other player tokens actually flipped, -1 if this is not
+	 *         a valid move in this one direction, that is, EMPTY or the end of the
+	 *         board is reached before seeing a player token.
+	 */
+	private int flip(int row, int col, int drow, int dcol, char player) {
+<span class="fc bfc" id="L117" title="All 2 branches covered.">		if (!validCoordinate(row, col))</span>
+<span class="fc" id="L118">			return -1;</span>
+<span class="fc bfc" id="L119" title="All 2 branches covered.">		if (this.board[row][col] == EMPTY)</span>
+<span class="fc" id="L120">			return -1;</span>
+<span class="fc bfc" id="L121" title="All 2 branches covered.">		if (this.board[row][col] == player)</span>
+<span class="fc" id="L122">			return 0;</span>
+<span class="pc bpc" id="L123" title="1 of 2 branches missed.">		if (this.board[row][col] == this.otherPlayer(player)) {</span>
+<span class="fc" id="L124">			int numChanged = this.flip(row + drow, col + dcol, drow, dcol, player);</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">			if (numChanged &gt;= 0) {</span>
+<span class="fc" id="L126">				this.board[row][col] = player;</span>
+<span class="fc" id="L127">				return numChanged + 1;</span>
+			} else {
+<span class="fc" id="L129">				return numChanged;</span>
+			}
+		}
+<span class="nc" id="L132">		return -1; // Should not get here!</span>
+	}
+
+	/**
+	 * Check if there is an alternation of P1 next to P2, starting at (row,col) in
+	 * direction (drow,dcol). That is, starting at (row,col) and heading in
+	 * direction (drow,dcol), you encounter a sequence of at least one P1 followed
+	 * by a P2, or at least one P2 followed by a P1. The board is not modified by
+	 * this method. Why is this method important? If
+	 * alternation(row,col,drow,dcol)==P1, then placing P1 right before (row,col),
+	 * assuming that square is EMPTY, is a valid move, resulting in a collection of
+	 * P2 being flipped.
+	 * 
+	 * @param row  starting row, in {0,...,dim-1} (typically {0,...,7})
+	 * @param col  starting col, in {0,...,dim-1} (typically {0,...,7})
+	 * @param drow the row direction, in {-1,0,1}
+	 * @param dcol the col direction, in {-1,0,1}
+	 * @return P1, if there is an alternation P2 ...P2 P1, or P2 if there is an
+	 *         alternation P1 ... P1 P2 in direction (dx,dy), EMPTY if there is no
+	 *         alternation
+	 */
+	private char alternation(int row, int col, int drow, int dcol) {
+<span class="pc bpc" id="L154" title="1 of 4 branches missed.">		if (drow == 0 &amp;&amp; dcol == 0) return EMPTY;</span>
+<span class="fc" id="L155">		char firstToken = this.get(row,col);</span>
+		while (true) {
+<span class="fc" id="L157">			char nextToken = this.get(row,col);</span>
+<span class="fc bfc" id="L158" title="All 4 branches covered.">			if(nextToken != P1 &amp;&amp; nextToken !=P2) return EMPTY;</span>
+<span class="fc bfc" id="L159" title="All 2 branches covered.">			if(nextToken == this.otherPlayer(firstToken)) return nextToken;</span>
+<span class="fc" id="L160">			row += drow; col += dcol;</span>
+<span class="fc" id="L161">		}</span>
+	}
+
+	/**
+	 * Return which player has a move (row,col) in direction (drow,dcol).
+	 * 
+	 * @param row  starting row, in {0,...,dim-1} (typically {0,...,7})
+	 * @param col  starting col, in {0,...,dim-1} (typically {0,...,7})
+	 * @param drow the row direction, in {-1,0,1}
+	 * @param dcol the col direction, in {-1,0,1}
+	 * @return P1,P2,EMPTY
+	 */
+	private char hasMove(int row, int col, int drow, int dcol) {
+<span class="pc bpc" id="L174" title="1 of 4 branches missed.">		if (!this.validCoordinate(row, col) || this.board[row][col] != this.EMPTY)</span>
+<span class="fc" id="L175">			return this.EMPTY;</span>
+<span class="fc" id="L176">		return this.alternation(row + drow, col + dcol, drow, dcol);</span>
+	}
+
+	/**
+	 * 
+	 * @return whether P1,P2 or BOTH have a move somewhere on the board, EMPTY if
+	 *         neither do.
+	 */
+	public char hasMove() {
+<span class="fc" id="L185">		char retVal = EMPTY;</span>
+<span class="fc bfc" id="L186" title="All 2 branches covered.">		for (int row = 0; row &lt; this.dim; row++) {</span>
+<span class="fc bfc" id="L187" title="All 2 branches covered.">			for (int col = 0; col &lt; this.dim; col++) {</span>
+<span class="fc bfc" id="L188" title="All 2 branches covered.">				for (int drow = -1; drow &lt;= 1; drow++) {</span>
+<span class="fc bfc" id="L189" title="All 2 branches covered.">					for (int dcol = -1; dcol &lt;= 1; dcol++) {</span>
+<span class="fc bfc" id="L190" title="All 4 branches covered.">						if (drow == 0 &amp;&amp; dcol == 0)</span>
+<span class="fc" id="L191">							continue;</span>
+<span class="fc" id="L192">						char p = this.hasMove(row, col, drow, dcol);</span>
+<span class="fc bfc" id="L193" title="All 4 branches covered.">						if (p == P1 &amp;&amp; retVal == P2)</span>
+<span class="fc" id="L194">							return BOTH;</span>
+<span class="fc bfc" id="L195" title="All 4 branches covered.">						if (p == P2 &amp;&amp; retVal == P1)</span>
+<span class="fc" id="L196">							return BOTH;</span>
+<span class="fc bfc" id="L197" title="All 2 branches covered.">						if (retVal == EMPTY)</span>
+<span class="fc" id="L198">							retVal = p;</span>
+					}
+				}
+			}
+		}
+<span class="fc" id="L203">		return retVal;</span>
+	}
+
+	/**
+	 * Make a move for player at position (row,col) according to Othello rules,
+	 * making appropriate modifications to the board. Nothing is changed if this is
+	 * not a valid move.
+	 * 
+	 * @param row    starting row, in {0,...,dim-1} (typically {0,...,7})
+	 * @param col    starting col, in {0,...,dim-1} (typically {0,...,7})
+	 * @param player P1 or P2
+	 * @return true if player moved successfully at (row,col), false otherwise
+	 */
+	public boolean move(int row, int col, char player) {
+<span class="pc bpc" id="L217" title="1 of 2 branches missed.">		if (!validCoordinate(row, col))</span>
+<span class="nc" id="L218">			return false;</span>
+<span class="fc bfc" id="L219" title="All 2 branches covered.">		if (this.board[row][col] != EMPTY)</span>
+<span class="fc" id="L220">			return false;</span>
+
+<span class="fc" id="L222">		int numChangedTotal = 0;</span>
+
+<span class="fc bfc" id="L224" title="All 2 branches covered.">		for (int drow = -1; drow &lt;= 1; drow++) {</span>
+<span class="fc bfc" id="L225" title="All 2 branches covered.">			for (int dcol = -1; dcol &lt;= 1; dcol++) {</span>
+<span class="fc bfc" id="L226" title="All 4 branches covered.">				if (drow == 0 &amp;&amp; dcol == 0)</span>
+<span class="fc" id="L227">					continue;</span>
+<span class="fc" id="L228">				int numChanged = flip(row + drow, col + dcol, drow, dcol, player);</span>
+<span class="fc bfc" id="L229" title="All 2 branches covered.">				if (numChanged &gt;= 0)</span>
+<span class="fc" id="L230">					numChangedTotal += numChanged;</span>
+			}
+		}
+<span class="fc bfc" id="L233" title="All 2 branches covered.">		if (numChangedTotal &gt; 0) {</span>
+<span class="fc" id="L234">			this.board[row][col] = player;</span>
+<span class="fc" id="L235">			return true;</span>
+		}
+<span class="fc" id="L237">		return false;</span>
+	}
+
+	/**
+	 * 
+	 * @param player P1 or P2
+	 * @return the number of tokens on the board for player
+	 */
+	public int getCount(char player) {
+<span class="fc" id="L246">		CountVisitor visitor = new CountVisitor(player);</span>
+<span class="fc" id="L247">		this.accept(visitor);</span>
+<span class="fc" id="L248">		return visitor.getCount();</span>
+	}
+
+	/**
+	 * @return a string representation of this, just the play area, with no
+	 *         additional information. DO NOT MODIFY THIS!!
+	*/
+	public String toString() {
+		// Use Visitor to render the board string
+<span class="fc" id="L257">		RenderVisitor renderer = new RenderVisitor(this.dim);</span>
+<span class="fc" id="L258">		this.accept(renderer);</span>
+<span class="fc" id="L259">		return renderer.finish();</span>
+	}
+
+	/**
+	 * A quick test of OthelloBoard. Output is on assignment page.
+	 * 
+	 * @param args
+	 */
+	public static void main(String[] args) {
+<span class="nc" id="L268">		OthelloBoard ob = new OthelloBoard(8);</span>
+<span class="nc" id="L269">		System.out.println(ob.toString());</span>
+<span class="nc" id="L270">		System.out.println(&quot;getCount(P1)=&quot; + ob.getCount(P1));</span>
+<span class="nc" id="L271">		System.out.println(&quot;getCount(P2)=&quot; + ob.getCount(P2));</span>
+<span class="nc bnc" id="L272" title="All 2 branches missed.">		for (int row = 0; row &lt; ob.dim; row++) {</span>
+<span class="nc bnc" id="L273" title="All 2 branches missed.">			for (int col = 0; col &lt; ob.dim; col++) {</span>
+<span class="nc" id="L274">				ob.board[row][col] = P1;</span>
+			}
+		}
+<span class="nc" id="L277">		System.out.println(ob.toString());</span>
+<span class="nc" id="L278">		System.out.println(&quot;getCount(P1)=&quot; + ob.getCount(P1));</span>
+<span class="nc" id="L279">		System.out.println(&quot;getCount(P2)=&quot; + ob.getCount(P2));</span>
+
+		// Should all be blank
+<span class="nc bnc" id="L282" title="All 2 branches missed.">		for (int drow = -1; drow &lt;= 1; drow++) {</span>
+<span class="nc bnc" id="L283" title="All 2 branches missed.">			for (int dcol = -1; dcol &lt;= 1; dcol++) {</span>
+<span class="nc" id="L284">				System.out.println(&quot;alternation=&quot; + ob.alternation(4, 4, drow, dcol));</span>
+			}
+		}
+
+<span class="nc bnc" id="L288" title="All 2 branches missed.">		for (int row = 0; row &lt; ob.dim; row++) {</span>
+<span class="nc bnc" id="L289" title="All 2 branches missed.">			for (int col = 0; col &lt; ob.dim; col++) {</span>
+<span class="nc bnc" id="L290" title="All 4 branches missed.">				if (row == 0 || col == 0) {</span>
+<span class="nc" id="L291">					ob.board[row][col] = P2;</span>
+				}
+			}
+		}
+<span class="nc" id="L295">		System.out.println(ob.toString());</span>
+
+		// Should all be P2 (O) except drow=0,dcol=0
+<span class="nc bnc" id="L298" title="All 2 branches missed.">		for (int drow = -1; drow &lt;= 1; drow++) {</span>
+<span class="nc bnc" id="L299" title="All 2 branches missed.">			for (int dcol = -1; dcol &lt;= 1; dcol++) {</span>
+<span class="nc" id="L300">				System.out.println(&quot;direction=(&quot; + drow + &quot;,&quot; + dcol + &quot;)&quot;);</span>
+<span class="nc" id="L301">				System.out.println(&quot;alternation=&quot; + ob.alternation(4, 4, drow, dcol));</span>
+			}
+		}
+
+		// Can't move to (4,4) since the square is not empty
+<span class="nc" id="L306">		System.out.println(&quot;Trying to move to (4,4) move=&quot; + ob.move(4, 4, P2));</span>
+
+<span class="nc" id="L308">		ob.board[4][4] = EMPTY;</span>
+<span class="nc" id="L309">		ob.board[2][4] = EMPTY;</span>
+
+<span class="nc" id="L311">		System.out.println(ob.toString());</span>
+
+<span class="nc bnc" id="L313" title="All 2 branches missed.">		for (int drow = -1; drow &lt;= 1; drow++) {</span>
+<span class="nc bnc" id="L314" title="All 2 branches missed.">			for (int dcol = -1; dcol &lt;= 1; dcol++) {</span>
+<span class="nc" id="L315">				System.out.println(&quot;direction=(&quot; + drow + &quot;,&quot; + dcol + &quot;)&quot;);</span>
+<span class="nc" id="L316">				System.out.println(&quot;hasMove at (4,4) in above direction =&quot; + ob.hasMove(4, 4, drow, dcol));</span>
+			}
+		}
+<span class="nc" id="L319">		System.out.println(&quot;who has a move=&quot; + ob.hasMove());</span>
+<span class="nc" id="L320">		System.out.println(&quot;Trying to move to (4,4) move=&quot; + ob.move(4, 4, P2));</span>
+<span class="nc" id="L321">		System.out.println(ob.toString());</span>
+		
+		
+<span class="nc" id="L324">		System.out.println(&quot;Testing flip method: before&quot;);</span>
+<span class="nc" id="L325">		ob = new OthelloBoard(Othello.DIMENSION);</span>
+<span class="nc bnc" id="L326" title="All 2 branches missed.">		for(int row=0;row&lt;Othello.DIMENSION;row++) {</span>
+<span class="nc bnc" id="L327" title="All 2 branches missed.">			for(int col=0;col&lt;Othello.DIMENSION;col++) {</span>
+<span class="nc bnc" id="L328" title="All 2 branches missed.">				if(row&gt;col)ob.board[row][col]=EMPTY;</span>
+<span class="nc" id="L329">				else ob.board[row][col]=P2;</span>
+<span class="nc bnc" id="L330" title="All 2 branches missed.">				if(col==Othello.DIMENSION-1)ob.board[row][col]=P1;</span>
+			}
+		}
+<span class="nc" id="L333">		ob.board[0][7]=EMPTY;</span>
+<span class="nc" id="L334">		ob.board[1][7]=P2;</span>
+<span class="nc" id="L335">		ob.board[4][4]=P1;</span>
+<span class="nc" id="L336">		System.out.println(ob.toString());</span>
+
+<span class="nc" id="L338">		System.out.println(&quot;Testing flip method: flipping&quot;);</span>
+<span class="nc bnc" id="L339" title="All 2 branches missed.">		for(int row=0;row&lt;Othello.DIMENSION;row++) {</span>
+<span class="nc" id="L340">			int num=ob.flip(row, 4, 0,1, P1);</span>
+<span class="nc" id="L341">			System.out.println(&quot;flip(&quot;+row+&quot;,4,0,1, P1)=&quot;+num);</span>
+		}
+<span class="nc" id="L343">		System.out.println(&quot;Testing flip method: after&quot;);</span>
+<span class="nc" id="L344">		System.out.println(ob.toString());</span>
+		
+<span class="nc" id="L346">		System.out.println(&quot;Testing alternation:&quot;);</span>
+<span class="nc bnc" id="L347" title="All 2 branches missed.">		for(int row=0;row&lt;Othello.DIMENSION;row++) {</span>
+<span class="nc" id="L348">			char result=ob.alternation(row, row, 0,1);</span>
+<span class="nc" id="L349">			System.out.println(&quot;alternation(&quot;+row+&quot;,&quot;+row+&quot;,0,1)=&quot;+result);</span>
+		}
+<span class="nc bnc" id="L351" title="All 2 branches missed.">		for(int row=0;row&lt;Othello.DIMENSION;row++) {</span>
+<span class="nc" id="L352">			char result=ob.alternation(row, row-1, 0,1);</span>
+<span class="nc" id="L353">			System.out.println(&quot;alternation(&quot;+row+&quot;,&quot;+(row-1)+&quot;,0,1)=&quot;+result);</span>
+		}
+		
+<span class="nc" id="L356">		System.out.println(&quot;Testing hasMove:&quot;);</span>
+<span class="nc bnc" id="L357" title="All 2 branches missed.">		for(int row=0;row&lt;Othello.DIMENSION;row++) {</span>
+<span class="nc" id="L358">			char result=ob.hasMove(row, row, 0,1);</span>
+<span class="nc" id="L359">			System.out.println(&quot;hasMove(&quot;+row+&quot;,&quot;+row+&quot;,0,1)=&quot;+result);</span>
+		}
+<span class="nc bnc" id="L361" title="All 2 branches missed.">		for(int row=0;row&lt;Othello.DIMENSION;row++) {</span>
+<span class="nc" id="L362">			char result=ob.hasMove(row, row-1, 0,1);</span>
+<span class="nc" id="L363">			System.out.println(&quot;hasMove(&quot;+row+&quot;,&quot;+(row-1)+&quot;,0,1)=&quot;+result);</span>
+		}
+		
+<span class="nc" id="L366">	}</span>
+
+	/**
+	 * Accept a visitor to traverse all cells (Visitor pattern).
+	 */
+	public void accept(BoardVisitor visitor) {
+<span class="fc bfc" id="L372" title="All 2 branches covered.">		for (int row = 0; row &lt; this.dim; row++) {</span>
+<span class="fc bfc" id="L373" title="All 2 branches covered.">			for (int col = 0; col &lt; this.dim; col++) {</span>
+<span class="fc" id="L374">				visitor.visit(row, col, this.board[row][col]);</span>
+			}
+		}
+<span class="fc" id="L377">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

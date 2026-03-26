@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RandomVSRandom.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EECS3311 Othello</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.eecs3311.othello.model</a> &gt; <span class="el_source">RandomVSRandom.java</span></div><h1>RandomVSRandom.java</h1><pre class="source lang-java linenums">package ca.yorku.eecs3311.othello.model;
+import java.util.Random;
+
+<span class="nc" id="L4">public class RandomVSRandom {</span>
+
+	public static void main(String[] args) {
+		// Below are the probabilities I got from OthelloControllerRandomVSRandom.java
+		// Note: Since we are not going to simulate ties, we should re-normalize
+		// the probabilities...
+<span class="nc" id="L10">		double p1wins=0.4496, p2wins=0.5056; </span>
+<span class="nc" id="L11">		double totalProbability = p1wins+p2wins;</span>
+<span class="nc" id="L12">		p1wins = p1wins/totalProbability;</span>
+<span class="nc" id="L13">		p2wins = p2wins/totalProbability;</span>
+
+		// H0: The probability of P1 or P2 winning using the Random Strategy is equal, so .5 and .5
+		// Ha: When both P1 and P2 are playing the RandomStrategy, P2 has a real advantage
+		// and so is more likely to win.
+
+		// We are interested in how likely it is that H0 is true and yet we arrive at 
+		// experimental probabilities that are as extreme or more than the ones we measured.
+<span class="nc" id="L21">		double distanceFromHalf = Math.abs(.5-p1wins);</span>
+<span class="nc" id="L22">		System.out.println(&quot;From 10000 plays of random vs tandom P(p1wins)=&quot;+p1wins);</span>
+<span class="nc" id="L23">		System.out.println(&quot;From 10000 plays of random vs random P(p2wins)=&quot;+p2wins);</span>
+
+<span class="nc" id="L25">		System.out.println(distanceFromHalf);</span>
+		// How likely it is to get, in 10,000 flips of a fair coin,
+		//  a difference like the one we are seeing here.
+		
+<span class="nc" id="L29">		int numRuns = 1000000;</span>
+<span class="nc" id="L30">		int numMoreThanExtreme = 0;</span>
+<span class="nc" id="L31">		double maxDistanceFromHalf = 0.0;</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">		for(int i=0;i&lt;numRuns;i++) {</span>
+<span class="nc" id="L33">			FlipProbabilities f = experiment(10000);</span>
+<span class="nc" id="L34">			double eDistanceFromHalf = Math.abs(f.pHeads-.5);</span>
+<span class="nc bnc" id="L35" title="All 2 branches missed.">			if(eDistanceFromHalf&gt;maxDistanceFromHalf) {</span>
+<span class="nc" id="L36">				maxDistanceFromHalf=eDistanceFromHalf;</span>
+			}
+<span class="nc bnc" id="L38" title="All 2 branches missed.">			if(eDistanceFromHalf&gt;=distanceFromHalf) {</span>
+<span class="nc" id="L39">				System.out.println(&quot;Got one!!&quot;);</span>
+<span class="nc" id="L40">				numMoreThanExtreme++;</span>
+			}
+			// System.out.println(eDistanceFromHalf);
+		}
+<span class="nc" id="L44">		System.out.println(&quot;Probability of H0&lt;&quot;+(double)numMoreThanExtreme/numRuns);</span>
+<span class="nc" id="L45">		System.out.println(&quot;Largest distance from half is=&quot;+maxDistanceFromHalf);</span>
+
+<span class="nc" id="L47">	}</span>
+		
+
+	/**
+	 * Run an experiment, flipping a coin num times. 
+	 * Record the experimental probability of heads and of tails.		
+	 * @param num
+	 */
+	public static FlipProbabilities experiment(int num) {
+<span class="nc" id="L56">		Random r = new Random();</span>
+<span class="nc" id="L57">		int numTrue = 0, numFalse=0;</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">		for(int i=0;i&lt;num;i++) {</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">			if(r.nextBoolean())numTrue++;</span>
+<span class="nc" id="L60">			else numFalse++;</span>
+		}
+<span class="nc" id="L62">		return new FlipProbabilities((float)numTrue/num, (float)numFalse/num);</span>
+	}
+	
+	private static class FlipProbabilities {
+		double pHeads, pTails;
+<span class="nc" id="L67">		FlipProbabilities(double pHeads, double pTails){</span>
+<span class="nc" id="L68">			this.pHeads=pHeads; this.pTails=pTails;</span>
+<span class="nc" id="L69">		}</span>
+		public String toString() {
+<span class="nc" id="L71">			return &quot;(&quot;+this.pHeads+&quot;,&quot;+this.pTails+&quot;)&quot;;</span>
+		}
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

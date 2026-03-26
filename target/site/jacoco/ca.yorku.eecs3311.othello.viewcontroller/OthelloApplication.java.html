@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OthelloApplication.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">EECS3311 Othello</a> &gt; <a href="index.source.html" class="el_package">ca.yorku.eecs3311.othello.viewcontroller</a> &gt; <span class="el_source">OthelloApplication.java</span></div><h1>OthelloApplication.java</h1><pre class="source lang-java linenums">package ca.yorku.eecs3311.othello.viewcontroller;
+import ca.yorku.eecs3311.othello.model.*;
+
+import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.control.ComboBox;
+import javafx.collections.FXCollections;
+import javafx.scene.control.Label;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.stage.FileChooser;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+
+/**
+ * JavaFX front-end controller for Othello.
+ * Acts as the View/Controller in MVC and uses Strategy to swap player behaviors
+ * (Human/Random/Greedy) at runtime via UI selections.
+ * Patterns:
+ * - MVC: acts as View/Controller; owns the Othello model and refreshes the UI.
+ * - Strategy: selects Player implementations (Human/Random/Greedy) at runtime from UI choices.
+ * - Command: uses OthelloMoveCommand with undo/redo stacks to navigate move history.
+ * - Memento (persistence): save/load persists model state to a file.
+ */
+<span class="fc" id="L38">public class OthelloApplication extends Application {</span>
+	private static final String TEST_STATE_FILE_PROPERTY = &quot;othello.test.stateFile&quot;;
+	// REMEMBER: To run this in the lab put 
+	// --module-path &quot;/usr/share/openjfx/lib&quot; --add-modules javafx.controls,javafx.fxml
+	// in the run configuration under VM arguments.
+	// You can import the JavaFX.prototype launch configuration and use it as well.
+
+	@Override
+	public void start(Stage stage) throws Exception {
+		// Create and hook up the Model, View and the controller
+		
+		// MODEL
+<span class="fc" id="L50">		Othello[] othelloRef = new Othello[]{new Othello()};</span>
+<span class="fc" id="L51">		Deque&lt;OthelloMoveCommand&gt; undoStack = new ArrayDeque&lt;&gt;();</span>
+<span class="fc" id="L52">		Deque&lt;OthelloMoveCommand&gt; redoStack = new ArrayDeque&lt;&gt;();</span>
+<span class="fc" id="L53">		Label status = new Label();</span>
+<span class="fc" id="L54">		status.setId(&quot;statusLabel&quot;);</span>
+<span class="fc" id="L55">		Button[][] cells = new Button[Othello.DIMENSION][Othello.DIMENSION];</span>
+		// Keep a flat list of all buttons so we can enable/disable on game over or restart
+<span class="fc" id="L57">		java.util.List&lt;Button&gt; allCells = new java.util.ArrayList&lt;&gt;();</span>
+<span class="fc" id="L58">		ComboBox&lt;String&gt; p1Choice = new ComboBox&lt;&gt;(FXCollections.observableArrayList(&quot;Human&quot;, &quot;Random&quot;, &quot;Greedy&quot;));</span>
+<span class="fc" id="L59">		ComboBox&lt;String&gt; p2Choice = new ComboBox&lt;&gt;(FXCollections.observableArrayList(&quot;Human&quot;, &quot;Random&quot;, &quot;Greedy&quot;));</span>
+<span class="fc" id="L60">		p1Choice.setId(&quot;player1Choice&quot;);</span>
+<span class="fc" id="L61">		p2Choice.setId(&quot;player2Choice&quot;);</span>
+<span class="fc" id="L62">		p1Choice.getSelectionModel().selectFirst();</span>
+<span class="fc" id="L63">		p2Choice.getSelectionModel().selectFirst();</span>
+
+		// CONTROLLER
+		// CONTROLLER-&gt;MODEL hookup
+	
+		// VIEW
+		// VIEW-&gt;CONTROLLER hookup
+		// MODEL-&gt;VIEW hookup
+		
+<span class="fc" id="L72">		GridPane grid = new GridPane();</span>
+<span class="fc" id="L73">		grid.setId(&quot;boardGrid&quot;);</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">		for (int r = 0; r &lt; Othello.DIMENSION; r++) </span>
+			{
+<span class="fc bfc" id="L76" title="All 2 branches covered.">			for (int c = 0; c &lt; Othello.DIMENSION; c++) </span>
+				{
+<span class="fc" id="L78">				Button cell = new Button();</span>
+<span class="fc" id="L79">				cell.setPrefSize(50, 50);</span>
+<span class="fc" id="L80">				cell.setId(&quot;cell-&quot; + r + &quot;-&quot; + c);</span>
+<span class="fc" id="L81">				final int row = r;</span>
+<span class="fc" id="L82">				final int col = c;</span>
+<span class="fc" id="L83">				cell.setOnAction(e -&gt; {</span>
+					// Only allow manual click when the current strategy is Human
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">					if (isHumanTurn(othelloRef[0].getWhosTurn(), p1Choice, p2Choice)) </span>
+						{
+<span class="fc" id="L87">						Othello before = othelloRef[0].copy();</span>
+<span class="fc bfc" id="L88" title="All 2 branches covered.">						if (othelloRef[0].move(row, col)) </span>
+						{
+<span class="fc" id="L90">							Othello after = othelloRef[0].copy();</span>
+<span class="fc" id="L91">							undoStack.push(new OthelloMoveCommand(before, after));</span>
+<span class="fc" id="L92">							redoStack.clear();</span>
+<span class="fc" id="L93">							refreshBoard(othelloRef[0], cells);</span>
+<span class="fc" id="L94">							updateStatus(othelloRef[0], status);</span>
+<span class="fc" id="L95">							runComputerMoves(othelloRef, cells, status, p1Choice, p2Choice, undoStack, redoStack, allCells);</span>
+<span class="fc" id="L96">							handleGameOver(othelloRef[0], allCells, status);</span>
+						}
+					}
+<span class="fc" id="L99">				});</span>
+<span class="fc" id="L100">				cells[r][c] = cell;</span>
+<span class="fc" id="L101">				grid.add(cell, c, r);</span>
+<span class="fc" id="L102">				allCells.add(cell);</span>
+			}
+		}
+<span class="fc" id="L105">		applyInitialStateFromProperty(othelloRef);</span>
+<span class="fc" id="L106">		refreshBoard(othelloRef[0], cells);</span>
+<span class="fc" id="L107">		updateStatus(othelloRef[0], status);</span>
+<span class="pc" id="L108">		p1Choice.setOnAction(e -&gt; runComputerMoves(othelloRef, cells, status, p1Choice, p2Choice, undoStack, redoStack, allCells));</span>
+<span class="pc" id="L109">		p2Choice.setOnAction(e -&gt; runComputerMoves(othelloRef, cells, status, p1Choice, p2Choice, undoStack, redoStack, allCells));</span>
+<span class="fc" id="L110">		runComputerMoves(othelloRef, cells, status, p1Choice, p2Choice, undoStack, redoStack, allCells);</span>
+<span class="fc" id="L111">		handleGameOver(othelloRef[0], allCells, status);</span>
+
+<span class="fc" id="L113">		HBox selectors = new HBox();</span>
+<span class="fc" id="L114">		selectors.setId(&quot;playerSelectors&quot;);</span>
+<span class="fc" id="L115">		selectors.setSpacing(10);</span>
+<span class="fc" id="L116">		selectors.getChildren().addAll(new Label(&quot;P1:&quot;), p1Choice, new Label(&quot;P2:&quot;), p2Choice);</span>
+
+		// Save/load chooser for picking files
+<span class="fc" id="L119">		FileChooser chooser = new FileChooser();</span>
+<span class="fc" id="L120">		chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(&quot;Othello save&quot;, &quot;*.txt&quot;));</span>
+<span class="fc" id="L121">		chooser.setInitialFileName(&quot;othello_save.txt&quot;);</span>
+
+<span class="fc" id="L123">		Button undoBtn = iconButton(&quot;Undo&quot;, &quot;Undo.png&quot;);</span>
+<span class="fc" id="L124">		Button redoBtn = iconButton(&quot;Redo&quot;, &quot;Redo.png&quot;);</span>
+<span class="fc" id="L125">		Button saveBtn = iconButton(&quot;Save&quot;, &quot;Save.png&quot;);</span>
+<span class="fc" id="L126">		Button loadBtn = iconButton(&quot;Load&quot;, &quot;Load.png&quot;);</span>
+<span class="fc" id="L127">		undoBtn.setId(&quot;undoButton&quot;);</span>
+<span class="fc" id="L128">		redoBtn.setId(&quot;redoButton&quot;);</span>
+<span class="fc" id="L129">		saveBtn.setId(&quot;saveButton&quot;);</span>
+<span class="fc" id="L130">		loadBtn.setId(&quot;loadButton&quot;);</span>
+
+		// undo button
+<span class="fc" id="L133">		undoBtn.setOnAction(e -&gt; {</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">			if (!undoStack.isEmpty()) </span>
+			{
+<span class="nc" id="L136">				OthelloMoveCommand cmd = undoStack.pop();</span>
+<span class="nc" id="L137">				redoStack.push(cmd);</span>
+<span class="nc" id="L138">				othelloRef[0] = cmd.undo();</span>
+<span class="nc" id="L139">				refreshBoard(othelloRef[0], cells);</span>
+<span class="nc" id="L140">				updateStatus(othelloRef[0], status);</span>
+<span class="nc" id="L141">				handleGameOver(othelloRef[0], allCells, status);</span>
+			}
+<span class="nc" id="L143">		});</span>
+
+		//redo button
+<span class="fc" id="L146">		redoBtn.setOnAction(e -&gt; {</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">			if (!redoStack.isEmpty()) {</span>
+<span class="nc" id="L148">				OthelloMoveCommand cmd = redoStack.pop();</span>
+<span class="nc" id="L149">				othelloRef[0] = cmd.execute();</span>
+<span class="nc" id="L150">				undoStack.push(cmd);</span>
+<span class="nc" id="L151">				refreshBoard(othelloRef[0], cells);</span>
+<span class="nc" id="L152">				updateStatus(othelloRef[0], status);</span>
+<span class="nc" id="L153">				runComputerMoves(othelloRef, cells, status, p1Choice, p2Choice, undoStack, redoStack, allCells);</span>
+<span class="nc" id="L154">				handleGameOver(othelloRef[0], allCells, status);</span>
+			}
+<span class="nc" id="L156">		});</span>
+
+		//save button
+<span class="fc" id="L159">		saveBtn.setOnAction(e -&gt; {</span>
+			try 
+			{
+				// Let user pick a file to save
+<span class="nc" id="L163">				java.io.File f = chooser.showSaveDialog(stage);</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">				if (f != null) </span>
+				{
+<span class="nc" id="L166">					saveState(othelloRef[0], f.toPath());</span>
+<span class="nc" id="L167">					status.setText(&quot;Saved: &quot; + f.getName());</span>
+				}
+			} 
+<span class="nc" id="L170">			catch (IOException ex) </span>
+			{
+<span class="nc" id="L172">				status.setText(&quot;Save failed&quot;);</span>
+<span class="nc" id="L173">			}</span>
+<span class="nc" id="L174">		});</span>
+
+		//Load Button
+<span class="fc" id="L177">		loadBtn.setOnAction(e -&gt; {</span>
+			try 
+			{
+				// Let user pick a file to load
+<span class="nc" id="L181">				java.io.File f = chooser.showOpenDialog(stage);</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">				if (f != null) </span>
+				{
+<span class="nc" id="L184">					Othello loaded = loadState(f.toPath());</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">					if (loaded != null) </span>
+					{
+<span class="nc" id="L187">						othelloRef[0] = loaded;</span>
+<span class="nc" id="L188">						undoStack.clear();</span>
+<span class="nc" id="L189">						redoStack.clear();</span>
+<span class="nc" id="L190">						refreshBoard(othelloRef[0], cells);</span>
+<span class="nc" id="L191">						updateStatus(othelloRef[0], status);</span>
+<span class="nc" id="L192">						runComputerMoves(othelloRef, cells, status, p1Choice, p2Choice, undoStack, redoStack, allCells);</span>
+<span class="nc" id="L193">						status.setText(&quot;Loaded: &quot; + f.getName());</span>
+<span class="nc" id="L194">						handleGameOver(othelloRef[0], allCells, status);</span>
+					} 
+					else 
+					{
+<span class="nc" id="L198">						status.setText(&quot;Load failed&quot;);</span>
+					}
+				}
+			} 
+<span class="nc" id="L202">			catch (IOException ex) </span>
+			{
+<span class="nc" id="L204">				status.setText(&quot;Load failed&quot;);</span>
+<span class="nc" id="L205">			}</span>
+<span class="nc" id="L206">		});</span>
+
+		//Restart Button
+<span class="fc" id="L209">		Button restartBtn = iconButton(&quot;Restart&quot;, &quot;Restart.png&quot;);</span>
+<span class="fc" id="L210">		restartBtn.setId(&quot;restartButton&quot;);</span>
+<span class="fc" id="L211">		restartBtn.setOnAction(e -&gt; {</span>
+<span class="nc" id="L212">			othelloRef[0] = new Othello();</span>
+<span class="nc" id="L213">			undoStack.clear();</span>
+<span class="nc" id="L214">			redoStack.clear();</span>
+<span class="nc" id="L215">			enableBoard(allCells, true);</span>
+<span class="nc" id="L216">			refreshBoard(othelloRef[0], cells);</span>
+<span class="nc" id="L217">			updateStatus(othelloRef[0], status);</span>
+<span class="nc" id="L218">			runComputerMoves(othelloRef, cells, status, p1Choice, p2Choice, undoStack, redoStack, allCells);</span>
+<span class="nc" id="L219">		});</span>
+
+<span class="fc" id="L221">		HBox historyBar = new HBox(10, undoBtn, redoBtn, restartBtn, saveBtn, loadBtn);</span>
+<span class="fc" id="L222">		historyBar.setId(&quot;historyBar&quot;);</span>
+
+<span class="fc" id="L224">		VBox root = new VBox(selectors, status, historyBar, grid);</span>
+<span class="fc" id="L225">		root.setId(&quot;othelloRoot&quot;);</span>
+<span class="fc" id="L226">		root.setSpacing(10);</span>
+<span class="fc" id="L227">		root.setPadding(new Insets(10));</span>
+
+<span class="fc" id="L229">		Scene scene = new Scene(root);</span>
+<span class="fc" id="L230">		stage.setTitle(&quot;Othello&quot;);</span>
+<span class="fc" id="L231">		stage.setScene(scene);</span>
+				
+		// LAUNCH THE GUI
+<span class="fc" id="L234">		stage.show();</span>
+<span class="fc" id="L235">	}</span>
+
+	public static void main(String[] args) {
+<span class="nc" id="L238">		OthelloApplication view = new OthelloApplication();</span>
+<span class="nc" id="L239">		launch(args);</span>
+<span class="nc" id="L240">	}</span>
+
+	/**
+	 * Refresh button text to match current board tokens (via Visitor traversal).
+	 */
+	private void refreshBoard(Othello othello, Button[][] cells) 
+	{
+<span class="fc" id="L247">		othello.accept((r, c, token) -&gt; {</span>
+<span class="fc" id="L248">			Button cell = cells[r][c];</span>
+<span class="fc" id="L249">			cell.setGraphic(null);</span>
+<span class="fc bfc" id="L250" title="All 2 branches covered.">			cell.setText(token == OthelloBoard.EMPTY ? &quot;&quot; : String.valueOf(token));</span>
+<span class="fc" id="L251">		});</span>
+<span class="fc" id="L252">	}</span>
+
+	/**
+	 * Update status label with counts and whose turn.
+	 */
+	private void updateStatus(Othello othello, Label status) 
+	{
+<span class="fc" id="L259">		status.setText(&quot;X:&quot; + othello.getCount(OthelloBoard.P1) + &quot; O:&quot; + othello.getCount(OthelloBoard.P2)</span>
+<span class="fc" id="L260">				+ &quot; | turn: &quot; + othello.getWhosTurn());</span>
+<span class="fc" id="L261">	}</span>
+
+	/**
+	 * Check if the current player is controlled by a human strategy.
+	 */
+	private boolean isHumanTurn(char who, ComboBox&lt;String&gt; p1Choice, ComboBox&lt;String&gt; p2Choice) 
+	{
+<span class="fc bfc" id="L268" title="All 2 branches covered.">		if (who == OthelloBoard.P1) </span>
+		{
+<span class="fc" id="L270">			return &quot;Human&quot;.equals(p1Choice.getValue());</span>
+		}
+<span class="pc bpc" id="L272" title="1 of 2 branches missed.">		if (who == OthelloBoard.P2) </span>
+		{
+<span class="fc" id="L274">			return &quot;Human&quot;.equals(p2Choice.getValue());</span>
+		}
+<span class="nc" id="L276">		return false;</span>
+	}
+
+	/**
+	 * Create a Player strategy instance based on the UI selection for the given side.
+	 */
+	private Player createPlayer(char who, ComboBox&lt;String&gt; p1Choice, ComboBox&lt;String&gt; p2Choice, Othello o) 
+	{
+<span class="nc bnc" id="L284" title="All 2 branches missed.">		String choice = who == OthelloBoard.P1 ? p1Choice.getValue() : p2Choice.getValue();</span>
+<span class="nc bnc" id="L285" title="All 2 branches missed.">		if (&quot;Random&quot;.equals(choice)) </span>
+		{
+<span class="nc" id="L287">			return new PlayerRandom(o, who);</span>
+		}
+<span class="nc bnc" id="L289" title="All 2 branches missed.">		if (&quot;Greedy&quot;.equals(choice))</span>
+		{
+<span class="nc" id="L291">			return new PlayerGreedy(o, who);</span>
+		}
+<span class="nc" id="L293">		return new PlayerHuman(o, who);</span>
+	}
+
+	/**
+	 * Auto-play AI turns until it becomes a human turn or the game ends.
+	 */
+	private void runComputerMoves(Othello[] othelloRef, Button[][] cells, Label status, ComboBox&lt;String&gt; p1Choice, ComboBox&lt;String&gt; p2Choice,
+			Deque&lt;OthelloMoveCommand&gt; undoStack, Deque&lt;OthelloMoveCommand&gt; redoStack, java.util.List&lt;Button&gt; allCells) 
+	{
+<span class="pc bpc" id="L302" title="1 of 4 branches missed.">		while (!othelloRef[0].isGameOver() &amp;&amp; !isHumanTurn(othelloRef[0].getWhosTurn(), p1Choice, p2Choice)) </span>
+		{
+<span class="nc" id="L304">			Player ai = createPlayer(othelloRef[0].getWhosTurn(), p1Choice, p2Choice, othelloRef[0]);</span>
+<span class="nc" id="L305">			Move m = ai.getMove();</span>
+<span class="nc bnc" id="L306" title="All 2 branches missed.">			if (m != null) </span>
+			{
+<span class="nc" id="L308">				Othello before = othelloRef[0].copy();</span>
+<span class="nc bnc" id="L309" title="All 2 branches missed.">				if (othelloRef[0].move(m.getRow(), m.getCol())) </span>
+				{
+<span class="nc" id="L311">					Othello after = othelloRef[0].copy();</span>
+<span class="nc" id="L312">					undoStack.push(new OthelloMoveCommand(before, after));</span>
+<span class="nc" id="L313">					redoStack.clear();</span>
+<span class="nc" id="L314">					refreshBoard(othelloRef[0], cells);</span>
+<span class="nc" id="L315">					updateStatus(othelloRef[0], status);</span>
+<span class="nc" id="L316">					handleGameOver(othelloRef[0], allCells, status);</span>
+				} 
+				else 
+				{
+					break;
+				}
+			} 
+			else 
+			{
+				break;
+			}
+<span class="nc" id="L327">		}</span>
+<span class="fc" id="L328">	}</span>
+
+	/**
+	 * Save current game state to a simple text file.
+	 */
+	private void saveState(Othello othello, Path path) throws IOException 
+	{
+<span class="nc" id="L335">		StringBuilder strb = new StringBuilder();</span>
+<span class="nc" id="L336">		strb.append(&quot;TURN:&quot;).append(othello.getWhosTurn()).append(&quot;\n&quot;);</span>
+<span class="nc" id="L337">		strb.append(&quot;MOVES:&quot;).append(othello.getNumMoves()).append(&quot;\n&quot;);</span>
+<span class="nc" id="L338">		strb.append(&quot;DIM:&quot;).append(Othello.DIMENSION).append(&quot;\n&quot;);</span>
+<span class="nc bnc" id="L339" title="All 2 branches missed.">		for (int r = 0; r &lt; Othello.DIMENSION; r++) </span>
+		{
+<span class="nc bnc" id="L341" title="All 2 branches missed.">			for (int c = 0; c &lt; Othello.DIMENSION; c++) </span>
+			{
+<span class="nc" id="L343">				char t = othello.getToken(r, c);</span>
+<span class="nc bnc" id="L344" title="All 2 branches missed.">				strb.append(t == OthelloBoard.EMPTY ? '.' : t);</span>
+			}
+<span class="nc" id="L346">			strb.append(&quot;\n&quot;);</span>
+		}
+<span class="nc" id="L348">		Files.writeString(path, strb.toString(), StandardCharsets.UTF_8);</span>
+<span class="nc" id="L349">	}</span>
+
+	/**
+	 * Load game state from file; returns null on parse error.
+	 */
+	private Othello loadState(Path path) throws IOException 
+	{
+<span class="fc" id="L356">		List&lt;String&gt; lines = Files.readAllLines(path, StandardCharsets.UTF_8);</span>
+<span class="pc bpc" id="L357" title="1 of 2 branches missed.">		if (lines.size() &lt; 3 + Othello.DIMENSION) return null;</span>
+<span class="fc" id="L358">		char turn = lines.get(0).charAt(&quot;TURN:&quot;.length());</span>
+<span class="fc" id="L359">		int moves = Integer.parseInt(lines.get(1).substring(&quot;MOVES:&quot;.length()));</span>
+<span class="fc" id="L360">		char[][] grid = new char[Othello.DIMENSION][Othello.DIMENSION];</span>
+<span class="fc bfc" id="L361" title="All 2 branches covered.">		for (int r = 0; r &lt; Othello.DIMENSION; r++) </span>
+		{
+<span class="fc" id="L363">			String row = lines.get(3 + r);</span>
+<span class="pc bpc" id="L364" title="1 of 4 branches missed.">			for (int c = 0; c &lt; Othello.DIMENSION &amp;&amp; c &lt; row.length(); c++) </span>
+			{
+<span class="fc" id="L366">				char ch = row.charAt(c);</span>
+<span class="fc bfc" id="L367" title="All 2 branches covered.">				grid[r][c] = (ch == '.') ? OthelloBoard.EMPTY : ch;</span>
+			}
+		}
+<span class="fc" id="L370">		return new Othello(new OthelloBoard(grid), turn, moves);</span>
+	}
+
+	/**
+	 * Allow tests to launch the UI from a saved state without touching the normal flow.
+	 */
+	private void applyInitialStateFromProperty(Othello[] othelloRef) 
+	{
+<span class="fc" id="L378">		String stateFile = System.getProperty(TEST_STATE_FILE_PROPERTY);</span>
+<span class="pc bpc" id="L379" title="1 of 4 branches missed.">		if (stateFile == null || stateFile.isBlank()) </span>
+		{
+<span class="fc" id="L381">			return;</span>
+		}
+		try 
+		{
+<span class="fc" id="L385">			Othello loaded = loadState(Path.of(stateFile));</span>
+<span class="pc bpc" id="L386" title="1 of 2 branches missed.">			if (loaded == null) </span>
+			{
+<span class="nc" id="L388">				throw new IllegalStateException(&quot;Unable to load test state from &quot; + stateFile);</span>
+			}
+<span class="fc" id="L390">			othelloRef[0] = loaded;</span>
+		} 
+<span class="nc" id="L392">		catch (IOException e) </span>
+		{
+<span class="nc" id="L394">			throw new IllegalStateException(&quot;Unable to load test state from &quot; + stateFile, e);</span>
+<span class="fc" id="L395">		}</span>
+<span class="fc" id="L396">	}</span>
+
+	/**
+	 * Disable/enable the board based on game state and show winner on game over.
+	 */
+	private void handleGameOver(Othello othello, java.util.List&lt;Button&gt; allCells, Label status) 
+	{
+<span class="fc bfc" id="L403" title="All 2 branches covered.">		if (othello.isGameOver()) </span>
+		{
+<span class="fc" id="L405">			enableBoard(allCells, false);</span>
+<span class="fc" id="L406">			status.setText(status.getText() + &quot; | game over, winner: &quot; + winnerLabel(othello));</span>
+		} 
+		else 
+		{
+<span class="fc" id="L410">			enableBoard(allCells, true);</span>
+		}
+<span class="fc" id="L412">	}</span>
+
+	/**
+	 * Enable or disable all board buttons.
+	 */
+	private void enableBoard(java.util.List&lt;Button&gt; allCells, boolean enabled) 
+	{
+<span class="fc bfc" id="L419" title="All 2 branches covered.">		for (Button b : allCells) </span>
+		{
+<span class="fc bfc" id="L421" title="All 2 branches covered.">			b.setDisable(!enabled);</span>
+<span class="fc" id="L422">		}</span>
+<span class="fc" id="L423">	}</span>
+
+	/**
+	 * Return a winner label (X/O or Tie).
+	 */
+	private String winnerLabel(Othello othello) 
+	{
+<span class="fc" id="L430">		char w = othello.getWinner();</span>
+<span class="fc bfc" id="L431" title="All 2 branches covered.">		if (w == OthelloBoard.EMPTY) </span>
+		{
+<span class="fc" id="L433">				return &quot;Tie&quot;;</span>
+		}
+<span class="fc" id="L435">		return String.valueOf(w);</span>
+	}
+	
+	/**
+	 * Create a button with an optional icon loaded from src/ca/yorku/eecs3311/Image.
+	 */
+	private Button iconButton(String text, String fileName) 
+	{
+<span class="fc" id="L443">		Button b = new Button(text);</span>
+		try {
+<span class="fc" id="L445">			Image img = new Image(&quot;file:src/ca/yorku/eecs3311/Image/&quot; + fileName);</span>
+<span class="fc" id="L446">			ImageView view = new ImageView(img);</span>
+<span class="fc" id="L447">			view.setFitWidth(20);</span>
+<span class="fc" id="L448">			view.setFitHeight(20);</span>
+<span class="fc" id="L449">			view.setPreserveRatio(true);</span>
+<span class="fc" id="L450">			b.setGraphic(view);</span>
+		} 
+<span class="nc" id="L452">		catch (Exception e) </span>
+		{
+			// If loading fails, just keep text.
+<span class="fc" id="L455">		}</span>
+<span class="fc" id="L456">		return b;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

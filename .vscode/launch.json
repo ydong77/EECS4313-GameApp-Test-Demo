@@ -1,0 +1,26 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "MVCApplication",
+      "request": "launch",
+      "mainClass": "ca.yorku.eecs3311.mvcexample.MVCApplication",
+      "projectName": "A2Fall2024"
+    },
+    {
+      "type": "java",
+      "name": "Othello",
+      "request": "launch",
+      "mainClass": "ca.yorku.eecs3311.othello.model.Othello",
+      "projectName": "A2Fall2024"
+    },
+    {
+      "type": "java",
+      "name": "OthelloApplication",
+      "request": "launch",
+      "mainClass": "ca.yorku.eecs3311.othello.viewcontroller.OthelloApplication",
+      "vmArgs": "--module-path \"C:\\\\Program Files\\\\Java\\\\javafx-sdk-17.0.17\\\\lib\" --add-modules javafx.controls,javafx.fxml"
+    }
+  ]
+}
